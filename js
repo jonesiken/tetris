@@ -1,8 +1,10 @@
 	let overlay = document.querySelector('.overlay');
 	let modal = document.querySelector('.modal');
 	let speed = 0; /*скорость*/
+	const startBtn = document.getElementById("start"); /*кнопка старт*/
+	const pauseBtn = document.getElementById("pause"); /*кнопка паузы*/
 	
-	modal.addEventListener('click', function (e) { /*обработчик событий при клике*/ 
+	modal.addEventListener('click', function (e) { /*обработчик событий при клике уровней*/ 
 		if (e.target.classList.contains('easy')) {
 			speed = 800;
 		} else if (e.target.classList.contains('normal')) {
@@ -312,75 +314,77 @@
 	
 	let score = 0;
 	let input = document.getElementsByTagName('input')[0]; /*обращаемся к имнпуту на старанице*/
+	let isPaused = false;
 	input.value = `Ваши очки: ${score}`;
 	
+	
 	function move() { /*функция падения фигур*/
-		let moveFlag = true;
-		let coordinates = [ /*получение координат для ячеик для падения*/
-			[figureBody[0].getAttribute('posX'), figureBody[0].getAttribute('posY')],
-			[figureBody[1].getAttribute('posX'), figureBody[1].getAttribute('posY')],
-			[figureBody[2].getAttribute('posX'), figureBody[2].getAttribute('posY')],
-			[figureBody[3].getAttribute('posX'), figureBody[3].getAttribute('posY')],
-		];
-			
-		for (let i=0; i<coordinates.length; i++) { /* обращацмся к каждому элементу по очереди*/
-			if (coordinates[i][1] == 1 || document.querySelector(`[posX = "${coordinates[i][0]}"][posY = "${coordinates[i][1]-1}"]`).classList.contains('set')) { /*отнимает класс figure и присваиваем set*/
-				moveFlag = false; /*запретить дальнейшее движение вниз, если конец тетриса или на падение на другую фигуру*/
-				break; /*прерывание элеманта, если попадает под условия*/
-			}
-		}
-			
-		if (moveFlag) { /*усл. если движение вниз возможно*/
-			for (let i=0; i<figureBody.length; i++) {
-				figureBody[i].classList.remove('figure'); /*убираем класс figure*/
-			}
-			figureBody = [ /*понижаем посY на 1 ячейку*/
-				document.querySelector(`[posX = "${coordinates[0][0]}"][posY = "${coordinates[0][1] -1}"]`),
-				document.querySelector(`[posX = "${coordinates[1][0]}"][posY = "${coordinates[1][1] -1}"]`),
-				document.querySelector(`[posX = "${coordinates[2][0]}"][posY = "${coordinates[2][1] -1}"]`),
-				document.querySelector(`[posX = "${coordinates[3][0]}"][posY = "${coordinates[3][1] -1}"]`),
-			];
-			for (let i=0; i<figureBody.length; i++) {
-				figureBody[i].classList.add('figure'); /*добавляем класс figure обратно*/
-			}
-		} else { /* запрещает дальнейшее движение вниз*/
-			for (let i=0; i<figureBody.length; i++) { /*проходимся циклом*/
-				figureBody[i].classList.remove('figure'); /*убираем класс figure*/
-				figureBody[i].classList.add('set'); /*добавляем класс set*/
-			}
-			for (let i=1; i<13; i++) { /*цикл, проходящий по всем рядам от 1 до 12 оси х*/
-			    let count = 0;
-			    for (let k=1; k<11; k++) { /*цикл, проходящий по всем рядам оси y*/
-				    if (document.querySelector (`[posX = "${k}"][posY = "${i}"]`).classList.contains('set')) { /*если какая то ячейка имеет класс set,то count повышается на единицу*/
-					    count++; /*повышаем на единицу*/
-					    if (count == 10) { /* если count = 10, то ряд заполнен, класс set убирается*/
-						    score += 10; /*прибавляются очки на 10*/
-						    input.value = `Ваши очки: ${score}`; /*инпунт перезаписывается*/
-						    for (let m=1; m<11; m++) { /*цикл, проходящий по всему ряду*/
-								document.querySelector (`[posX = "${m}"][posY = "${i}"]`).classList.remove('set') /* класс set при заполнении ряда убирается*/
-						    }
-						    let set = document.querySelectorAll('.set'); /*все элементы с классом set*/
-						    let newSet = []; /*новая переменная в которой записывается перемещение при падении*/
-						    for (let s=0; s<set.length; s++) { /*проверяющий цикл всех ячеик set*/
-								let setCoordinates = [set[s].getAttribute('posX'), set[s].getAttribute('posY')]; /* позиция x и y с классом set*/
-								if (setCoordinates[1] > i) { /*если setCoordinates больше чем i, цикл, в котором все находится*/
-									set[s].classList.remove('set'); /*то set с индексом [s] отнимает класс set*/
-									newSet.push(document.querySelector(`posX = "${setCoordinates[0]}"][posY = "${setCoordinates[1]-1}"]`)); /*обращаемся к нижней ячейке и добавляем ей set*/
+		if (!isPaused) {
+			let moveFlag = true;
+			let coordinates = [ /*получение координат для ячеик для падения*/
+				[figureBody[0].getAttribute('posX'), figureBody[0].getAttribute('posY')],
+				[figureBody[1].getAttribute('posX'), figureBody[1].getAttribute('posY')],
+				[figureBody[2].getAttribute('posX'), figureBody[2].getAttribute('posY')],
+				[figureBody[3].getAttribute('posX'), figureBody[3].getAttribute('posY')],
+			];	
+			for (let i=0; i<coordinates.length; i++) { /* обращацмся к каждому элементу по очереди*/
+				if (coordinates[i][1] == 1 || document.querySelector(`[posX = "${coordinates[i][0]}"][posY = "${coordinates[i][1]-1}"]`).classList.contains('set')) { /*отнимает класс figure и присваиваем set*/
+					moveFlag = false; /*запретить дальнейшее движение вниз, если конец тетриса или на падение на другую фигуру*/
+					break; /*прерывание элеманта, если попадает под условия*/
+				}
+			}			
+			if (moveFlag) { /*усл. если движение вниз возможно*/
+				for (let i=0; i<figureBody.length; i++) {
+					figureBody[i].classList.remove('figure'); /*убираем класс figure*/
+				}
+				figureBody = [ /*понижаем посY на 1 ячейку*/
+					document.querySelector(`[posX = "${coordinates[0][0]}"][posY = "${coordinates[0][1] -1}"]`),
+					document.querySelector(`[posX = "${coordinates[1][0]}"][posY = "${coordinates[1][1] -1}"]`),
+					document.querySelector(`[posX = "${coordinates[2][0]}"][posY = "${coordinates[2][1] -1}"]`),
+					document.querySelector(`[posX = "${coordinates[3][0]}"][posY = "${coordinates[3][1] -1}"]`),
+				];
+				for (let i=0; i<figureBody.length; i++) {
+					figureBody[i].classList.add('figure'); /*добавляем класс figure обратно*/
+				}
+			} else { /* запрещает дальнейшее движение вниз*/
+				for (let i=0; i<figureBody.length; i++) { /*проходимся циклом*/
+					figureBody[i].classList.remove('figure'); /*убираем класс figure*/
+					figureBody[i].classList.add('set'); /*добавляем класс set*/
+				}
+				for (let i=1; i<13; i++) { /*цикл, проходящий по всем рядам от 1 до 12 оси х*/
+					let count = 0;
+					for (let k=1; k<11; k++) { /*цикл, проходящий по всем рядам оси y*/
+						if (document.querySelector (`[posX = "${k}"][posY = "${i}"]`).classList.contains('set')) { /*если какая то ячейка имеет класс set,то count повышается на единицу*/
+							count++; /*повышаем на единицу*/
+							if (count == 10) { /* если count = 10, то ряд заполнен, класс set убирается*/
+								score += 10; /*прибавляются очки на 10*/
+								input.value = `Ваши очки: ${score}`; /*инпунт перезаписывается*/
+								for (let m=1; m<11; m++) { /*цикл, проходящий по всему ряду*/
+									document.querySelector (`[posX = "${m}"][posY = "${i}"]`).classList.remove('set') /* класс set при заполнении ряда убирается*/
+								}					
+								let set = document.querySelectorAll('.set'); /*все элементы с классом set*/
+								let newSet = []; /*новая переменная в которой записывается перемещение при падении*/
+								for (let s=0; s<set.length; s++) { /*проверяющий цикл всех ячеик set*/
+									let setCoordinates = [set[s].getAttribute('posX'), set[s].getAttribute('posY')]; /* позиция x и y с классом set*/
+									if (setCoordinates[1] > i) { /*если setCoordinates больше чем i, цикл, в котором все находится*/
+										set[s].classList.remove('set'); /*то set с индексом [s] отнимает класс set*/
+										newSet.push(document.querySelector(`posX = "${setCoordinates[0]}"][posY = "${setCoordinates[1]-1}"]`)); /*обращаемся к нижней ячейке и добавляем ей set*/
+									}
+								}							
+								for (let a=0; a<newSet.length; a++){ /* цикл, проходщящий по массиву newSet*/
+									newSet[a].classList.add('set'); /*каждому элементу newSet с индексом [a] добавляется классс [set]*/
 								}
-						    }
-							for (let a=0; a<newSet.length; a++){ /* цикл, проходщящий по массиву newSet*/
-								newSet[a].classList.add('set'); /*каждому элементу newSet с индексом [a] добавляется классс [set]*/
+								i--; /*понижение ряда*/
 							}
-							i--; /*понижение ряда*/
 						}
 					}
-				}
-			}
-			for (let n=1; n<11; n++) { /*цикл, проходящий по последнему ряду*/
-				if (document.querySelector(`[posX = "${n}"][posY = "13"]`).classList.contains('set')) { /*как только фигура застрянет на 13 ряду*/
-					clearInterval(interval); /*прерываем интервал*/
-					alert(`Игра окончена. Ваши очки: ${score}`);
-					break; /*цикл не должен исполняться*/
+				}	
+				for (let n=1; n<11; n++) { /*цикл, проходящий по последнему ряду*/
+					if (document.querySelector(`[posX = "${n}"][posY = "13"]`).classList.contains('set')) { /*как только фигура застрянет на 13 ряду*/
+						clearInterval(interval); /*прерываем интервал*/
+						alert(`Игра окончена. Ваши очки: ${score}`);
+						break; /*цикл не должен исполняться*/
+					}
 				}
 			}
 			create(); /*вызов функции*/
@@ -468,6 +472,15 @@
 				}
 			}
 		}
-	})
-	
+	});
+
+	pauseBtn.addEventListener("click", (e) => { /*обработчик при клике на паузу*/
+		if (e.target.innerHTML === 'Пауза') {
+			e.target.innerHTML = 'Продолжить играть'
+		} else {
+			e.target.innerHTML = 'Пауза';
+		}
+		isPaused = !isPaused;
+	});
+
 	}
