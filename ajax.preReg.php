@@ -6,7 +6,7 @@
     exit("error");
   }
   
-  $mysqli = new mysqli("localhost","noradrzo_827","3&Uf&R2p","noradrzo_827");
+  $mysqli = new mysqli("localhost","");
   $result = $mysqli->query("SELECT id FROM `users` WHERE `name`='$name'");
   if ($result->num_rows) { /*Если записи есть, то говорим, что уже существует*/
     $res = $result->fetch_assoc();
