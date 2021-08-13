@@ -2,7 +2,7 @@
   session_start(); 
   $uri = $_SERVER['REQUEST_URI'];
   $uri = explode('/', $uri);
-  $mysqli = new mysqli("localhost","noradrzo_827","3&Uf&R2p","noradrzo_827");
+  $mysqli = new mysqli("localhost","");
   require_once("php/classes/simple_html_dom.php");  
   require_once("php/classes/User.php");
   
